@@ -1,0 +1,27 @@
+{
+  "name": "static-page-utils",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/gm": "^1.25.4",
+    "@types/lru-cache": "^7.10.10",
+    "@types/node": "^22.14.0",
+    "autoprefixer": "^10.4.21",
+    "fast-xml-parser": "^5.2.0",
+    "gm": "^1.25.1",
+    "image-size": "^2.0.2",
+    "lru-cache": "^11.1.0",
+    "mime": "^4.0.7",
+    "node-xml-parser": "^0.0.6",
+    "postcss": "^8.5.3",
+    "sass": "^1.86.3",
+    "svgo": "^3.3.2"
+  }
+}
