@@ -1,6 +1,6 @@
 import { resolve } from "path";
-import { Settings } from "../settings";
-import { importJs } from "./import";
+import { Settings } from "../settings.js";
+import { importJs } from "./import.js";
 
 export const importJsOnce =
   (settings: Settings) => async (path: string, cache: Map<string, boolean>) => {

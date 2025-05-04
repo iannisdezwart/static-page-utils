@@ -1,6 +1,6 @@
 import { readFileSync } from "fs";
-import { Settings } from "../settings";
 import { buildXML, parseXML } from "node-xml-parser";
+import { Settings } from "../settings.js";
 
 export const svgAsDataString = (settings: Settings) => (filePath: string) => {
   const svgFile = readFileSync(filePath, "utf-8");

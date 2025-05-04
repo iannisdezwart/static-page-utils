@@ -1,9 +1,9 @@
 import { createHash } from "crypto";
 import { existsSync, mkdirSync } from "fs";
-import { compressImage } from "../img/import";
-import { Settings } from "../settings";
 import { SubClass } from "gm";
 import { join, resolve } from "path";
+import { compressImage } from "../img/import.js";
+import { Settings } from "../settings.js";
 
 export interface SEO {
   description: string;

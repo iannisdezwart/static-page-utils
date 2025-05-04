@@ -1,6 +1,6 @@
-import { resolve, parse, join } from "path";
-import { Settings } from "../settings";
 import { existsSync, mkdirSync, symlinkSync } from "fs";
+import { join, parse, resolve } from "path";
+import { Settings } from "../settings.js";
 
 export const linkResource = (settings: Settings) => (srcPath: string) => {
   const webroot = resolve(settings.webroot);

@@ -1,6 +1,6 @@
-import { LRUCache } from "lru-cache";
-import { Settings } from "../settings";
 import https from "https";
+import { LRUCache } from "lru-cache";
+import { Settings } from "../settings.js";
 
 export const importExternalCss =
   (settings: Settings, memCache: LRUCache<string, string>) => (url: string) =>

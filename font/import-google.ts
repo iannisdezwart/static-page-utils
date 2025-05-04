@@ -1,8 +1,8 @@
 import { createHash } from "crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { join, resolve } from "path";
-import { StaticPageUtils } from "..";
-import { Settings } from "../settings";
+import { Settings } from "../settings.js";
+import { StaticPageUtils } from "../index.js";
 
 interface FontStyle {
   weight: 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900;

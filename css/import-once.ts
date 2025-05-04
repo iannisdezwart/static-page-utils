@@ -1,6 +1,6 @@
 import { resolve } from "path";
-import { Settings } from "../settings";
-import { StaticPageUtils } from "..";
+import { Settings } from "../settings.js";
+import { StaticPageUtils } from "../index.js";
 
 export const importCssOnce =
   (settings: Settings, obj: StaticPageUtils) =>

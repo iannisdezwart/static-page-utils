@@ -1,6 +1,6 @@
-import { join, resolve } from "path";
-import { Settings } from "../settings";
 import { copyFileSync } from "fs";
+import { join, resolve } from "path";
+import { Settings } from "../settings.js";
 
 export const importPwaServiceWorker =
   (settings: Settings) => (path: string) => {

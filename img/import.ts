@@ -1,9 +1,9 @@
 import { existsSync, mkdirSync, readFileSync } from "fs";
-import imageSize from "image-size";
-import { join, parse, resolve as resolvePath } from "path";
-import { Settings } from "../settings";
-import mime from "mime";
 import { SubClass } from "gm";
+import imageSize from "image-size";
+import mime from "mime";
+import { join, parse, resolve as resolvePath } from "path";
+import { Settings } from "../settings.js";
 
 const standardImageDimensions = [640, 960, 1280, 1920, 2560, 3840];
 const defaultExtensions = ["jpg", "webp"];

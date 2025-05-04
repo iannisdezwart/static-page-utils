@@ -1,8 +1,3 @@
-import imageSize from "image-size";
-import { PageShell } from "../page-shell/page-shell";
-import { Settings } from "../settings";
-import { join, parse, resolve } from "path";
-import { SubClass } from "gm";
 import {
   copyFileSync,
   existsSync,
@@ -10,6 +5,11 @@ import {
   readFileSync,
   writeFileSync,
 } from "fs";
+import { SubClass } from "gm";
+import imageSize from "image-size";
+import { join, parse, resolve } from "path";
+import { PageShell } from "../page-shell/page-shell.js";
+import { Settings } from "../settings.js";
 
 interface PWAManifestProtocolHandler {
   protocol: string;

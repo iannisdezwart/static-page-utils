@@ -1,9 +1,9 @@
 import { createHash } from "crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
-import { Settings } from "../settings";
-import { getCssPrefixer } from "../css/util/prefixer";
-import { renderSync } from "sass";
 import { resolve } from "path";
+import { renderSync } from "sass";
+import { getCssPrefixer } from "../css/util/prefixer.js";
+import { Settings } from "../settings.js";
 
 export const importSass =
   (settings: Settings, prefixCss: ReturnType<typeof getCssPrefixer>) =>

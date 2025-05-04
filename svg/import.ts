@@ -1,9 +1,9 @@
 import { createHash } from "crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
-import { Settings } from "../settings";
-import { optimize } from "svgo";
-import { join, resolve } from "path";
 import { buildXML, parseXML, XMLNode } from "node-xml-parser";
+import { join, resolve } from "path";
+import { optimize } from "svgo";
+import { Settings } from "../settings.js";
 
 interface ImportSVGOptions {
   alt?: string;

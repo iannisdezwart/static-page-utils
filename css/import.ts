@@ -1,5 +1,5 @@
 import { readFileSync } from "fs";
-import { getCssPrefixer } from "./util/prefixer";
+import { getCssPrefixer } from "./util/prefixer.js";
 
 export const importCss =
   (prefixCss: ReturnType<typeof getCssPrefixer>) => async (path: string) =>

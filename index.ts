@@ -1,24 +1,24 @@
 import gm from "gm";
 import { LRUCache } from "lru-cache";
-import { importExternalCss } from "./css/import-external";
-import { importGoogleFont } from "./font/import-google";
-import { importImg } from "./img/import";
-import { Settings } from "./settings";
-import { importSvg } from "./svg/import";
-import { svgAsDataString } from "./svg/as-data-string";
-import { linkResource } from "./res/link";
-import { getCssPrefixer } from "./css/util/prefixer";
-import { importCss } from "./css/import";
-import { importCssOnce } from "./css/import-once";
-import { importSass } from "./sass/import";
-import { importSassOnce } from "./sass/import-once";
-import { importJs } from "./js/import";
-import { importJsOnce } from "./js/import-once";
-import { importExternalJs } from "./js/import-external";
-import { importExternalJsOnce } from "./js/import-external-once";
-import { makePageShell } from "./page-shell/page-shell";
-import { createPwaManifest } from "./pwa/create-manifest";
-import { importPwaServiceWorker } from "./pwa/import-service-worker";
+import { importExternalCss } from "./css/import-external.js";
+import { importCssOnce } from "./css/import-once.js";
+import { importCss } from "./css/import.js";
+import { getCssPrefixer } from "./css/util/prefixer.js";
+import { importGoogleFont } from "./font/import-google.js";
+import { importImg } from "./img/import.js";
+import { importExternalJsOnce } from "./js/import-external-once.js";
+import { importExternalJs } from "./js/import-external.js";
+import { importJsOnce } from "./js/import-once.js";
+import { importJs } from "./js/import.js";
+import { makePageShell } from "./page-shell/page-shell.js";
+import { createPwaManifest } from "./pwa/create-manifest.js";
+import { importPwaServiceWorker } from "./pwa/import-service-worker.js";
+import { linkResource } from "./res/link.js";
+import { importSassOnce } from "./sass/import-once.js";
+import { importSass } from "./sass/import.js";
+import { Settings } from "./settings.js";
+import { svgAsDataString } from "./svg/as-data-string.js";
+import { importSvg } from "./svg/import.js";
 
 export type StaticPageUtils = {
   font: {

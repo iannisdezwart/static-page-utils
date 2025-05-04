@@ -1,7 +1,7 @@
 import { createHash } from "crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { join, resolve as resolvePath } from "path";
-import { Settings } from "../../settings";
+import { Settings } from "../../settings.js";
 
 // Lazy-load autoprefixer and postcss, because they are slow to load.
 let autoprefixer: any;
