@@ -1,6 +1,5 @@
 import { createHash } from "crypto";
 import { existsSync, mkdirSync } from "fs";
-import { SubClass } from "gm";
 import { join, resolve } from "path";
 import { compressImage } from "../img/import.js";
 import { Settings } from "../settings.js";
@@ -21,16 +20,15 @@ export interface PageShellOptions {
 }
 
 export const makePageShell =
-  (settings: Settings, imageMagick: SubClass) =>
+  (settings: Settings) =>
   (options: PageShellOptions) => {
-    return new PageShell(options, settings, imageMagick);
+    return new PageShell(options, settings);
   };
 
 export class PageShell {
   constructor(
     public options: PageShellOptions = {},
-    public settings: Settings,
-    public imageMagick: SubClass
+    public settings: Settings
   ) {
     this.options = options;
   }
@@ -64,17 +62,13 @@ export class PageShell {
       if (!existsSync(seoImgFileNoExt + ".jpg")) {
         await compressImage(
           this.settings,
-          this.imageMagick,
+          65,
+          true,
+          ["jpg"],
           seo.image,
           seoImgFileNoExt,
           1200,
-          1.905,
-          {
-            quality: 65,
-            alt: "SEO Image",
-            extensions: ["jpg"],
-            forceSize: true,
-          }
+          1.905
         );
       }
     }

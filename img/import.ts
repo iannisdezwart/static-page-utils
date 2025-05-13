@@ -1,9 +1,11 @@
 import { existsSync, mkdirSync, readFileSync } from "fs";
-import { SubClass } from "gm";
 import imageSize from "image-size";
 import mime from "mime";
 import { join, parse, resolve as resolvePath } from "path";
 import { Settings } from "../settings.js";
+import { execFile } from "child_process";
+import { promisify } from "util";
+import { createHash } from "crypto";
 
 const standardImageDimensions = [640, 960, 1280, 1920, 2560, 3840];
 const defaultExtensions = ["jpg", "webp"];
@@ -29,10 +31,13 @@ export type ImportImageOptions = {
 };
 
 export const importImg =
-  (settings: Settings, imageMagick: SubClass) =>
-  (filePath: string, options: ImportImageOptions) =>
+  (settings: Settings) => (filePath: string, options: ImportImageOptions) =>
     new Promise<string>(async (resolve) => {
       settings.logger("debug", `Importing JPG: ${filePath}`);
+
+      if (options.extensions === undefined) {
+        options.extensions = defaultExtensions;
+      }
 
       // Get width, height & aspect ratio of image.
       const { width, height } = imageSize(readFileSync(filePath));
@@ -57,26 +62,27 @@ export const importImg =
       }
 
       const imageDimensions = standardImageDimensions.map(
-        (el) => el * (options.widthRatio!)
+        (el) => el * options.widthRatio!
       );
       const inputFilePath = resolvePath(filePath);
-      const inputFileDir = parse(inputFilePath).name;
-      const fileName = parse(inputFilePath).name;
-      const outputFilename = `${fileName}-${options.widthRatio}`;
+      const filePathHash = createHash("md5")
+        .update(inputFilePath)
+        .digest("hex");
+      const outputName = `${filePathHash}-${options.widthRatio}`;
       const webroot = resolvePath(settings.webroot);
-      const outputDir = join(webroot, "res", inputFileDir);
+      const resDir = join(webroot, "res");
 
       // Create output directory, if needed.
-      if (!existsSync(outputDir)) {
-        mkdirSync(outputDir, { recursive: true });
-        settings.logger("info", `Created directory: ${outputDir}`);
+      if (!existsSync(resDir)) {
+        mkdirSync(resDir, { recursive: true });
+        settings.logger("info", `Created directory: ${resDir}`);
       }
 
       // Called when all images have been processed.
       const finish = () => {
         const createURL = (size: number, extension: string) =>
           encodeURI(
-            `/res/${inputFileDir}/${outputFilename}-${size.toFixed()}.${extension}?cache-age=604800`
+            `/res/${outputName}-${size.toFixed()}.${extension}?cache-age=604800`
           );
 
         const createSource = (size: number, extension: string) => {
@@ -126,11 +132,13 @@ export const importImg =
       // Check if the images have already been processed.
       let imagesAlreadyProcessed = true;
 
+      const outputFile = join(resDir, outputName);
       for (const standardDimension of standardImageDimensions) {
-        const outputPath = `${outputDir}/${outputFilename}-${standardDimension}`;
+        const outputFileWithDim = `${outputFile}-${standardDimension}`;
         if (
-          !existsSync(outputPath + ".jpg") &&
-          !existsSync(outputPath + ".webp")
+          !options.extensions.every((ext) =>
+            existsSync(`${outputFileWithDim}.${ext}`)
+          )
         ) {
           imagesAlreadyProcessed = false;
           break;
@@ -147,69 +155,74 @@ export const importImg =
       for (let i = 0; i < imageDimensions.length; i++) {
         const dimension = imageDimensions[i];
         const standardDimension = standardImageDimensions[i];
-        const outputPath = `${outputDir}/${outputFilename}-${standardDimension}`;
+        const outputFileWithDim = `${outputFile}-${standardDimension}`;
 
         await compressImage(
           settings,
-          imageMagick,
+          options.quality,
+          options.forceSize,
+          options.extensions,
           filePath,
-          outputPath,
+          outputFileWithDim,
           dimension,
-          aspectRatio,
-          options
+          aspectRatio
         );
       }
 
       finish();
     });
 
-export const compressImage = (
+export const compressImage = async (
   settings: Settings,
-  imageMagick: SubClass,
-  path: string,
+  quality: number | undefined,
+  forceSize: boolean | undefined,
+  extensions: string[],
+  inputPath: string,
   outputFileWithoutExt: string,
   dimension: number,
-  aspectRatio: number,
-  options: ImportImageOptions
-) =>
-  new Promise<void>((resolvePromise) => {
-    const imageState = imageMagick(path);
+  aspectRatio: number
+) => {
+  inputPath = resolvePath(inputPath);
 
-    if (options.forceSize) {
-      imageState
-        .resize(dimension, dimension / aspectRatio, "^")
-        .gravity("Center")
-        .extent(dimension, dimension / aspectRatio);
-    } else {
-      imageState.resize(dimension, dimension / aspectRatio, ">");
-    }
+  quality ??= 65;
+  const width = dimension;
+  const height = Math.round(dimension / aspectRatio);
 
-    imageState
-      .quality(options.quality ?? 65)
-      .strip()
-      .interlace("Plane")
-      .samplingFactor(4, 2);
+  const args = [
+    inputPath,
+    "-strip",
+    "-interlace",
+    "Plane",
+    "-sampling-factor",
+    "4:2:0",
+    "-quality",
+    quality.toString(),
+  ];
 
-    let finishedImages = 0;
+  if (forceSize) {
+    args.push("-resize", `${width}x${height}^`);
+    args.push("-gravity", "Center");
+    args.push("-extent", `${width}x${height}`);
+  } else {
+    args.push("-resize", `${width}x${height}>`);
+  }
 
-    const imageWriteCallback = (path: string) => (err: Error | null) => {
-      if (err !== null) {
-        console.error("error while converting image:", err);
+  await Promise.all(
+    extensions.map(async (ext) => {
+      const outputPath = `${outputFileWithoutExt}.${ext}`;
+      try {
+        await promisify(execFile)("magick", [...args, outputPath]);
+        settings.logger(
+          "info",
+          `Processed image: ${inputPath} -> ${outputPath}`
+        );
+      } catch (err) {
+        settings.logger(
+          "error",
+          `Error processing image: ${inputPath}\n${err}`
+        );
         throw err;
       }
-
-      settings.logger("info", `Processed image: ${path}`);
-
-      finishedImages++;
-      if (finishedImages == (options.extensions ?? defaultExtensions).length) {
-        resolvePromise();
-      }
-    };
-
-    for (const ext of options.extensions ?? defaultExtensions) {
-      imageState.write(
-        outputFileWithoutExt + "." + ext,
-        imageWriteCallback(outputFileWithoutExt + "." + ext)
-      );
-    }
-  });
+    })
+  );
+};

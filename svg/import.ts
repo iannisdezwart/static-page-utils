@@ -98,9 +98,9 @@ export const importSvg =
       seperator: "",
     });
 
-    if (!existsSync(cacheDir)) {
-      mkdirSync(cacheDir, { recursive: true });
-      settings.logger("debug", `Created directory: ${cacheDir}`);
+    if (!existsSync(svgCacheDir)) {
+      mkdirSync(svgCacheDir, { recursive: true });
+      settings.logger("debug", `Created directory: ${svgCacheDir}`);
     }
 
     writeFileSync(svgCacheFile, svgString);

@@ -1,4 +1,3 @@
-import gm from "gm";
 import { LRUCache } from "lru-cache";
 import { importExternalCss } from "./css/import-external.js";
 import { importCssOnce } from "./css/import-once.js";
@@ -63,7 +62,6 @@ export const staticPageUtils = (settings: Settings) => {
     maxSize: 100 * 1024 * 1024, // 100 MB
     sizeCalculation: (value) => value.length,
   });
-  const imageMagick = gm.subClass({ imageMagick: true });
   const cssPrefixer = getCssPrefixer(settings);
 
   let obj: StaticPageUtils = {} as unknown as StaticPageUtils;
@@ -87,7 +85,7 @@ export const staticPageUtils = (settings: Settings) => {
       importExternalOnce: importExternalJsOnce(settings, obj),
     },
     img: {
-      import: importImg(settings, imageMagick),
+      import: importImg(settings),
     },
     svg: {
       import: importSvg(settings),
@@ -97,10 +95,10 @@ export const staticPageUtils = (settings: Settings) => {
       link: linkResource(settings),
     },
     shell: {
-      make: makePageShell(settings, imageMagick),
+      make: makePageShell(settings),
     },
     pwa: {
-      createManifest: createPwaManifest(settings, imageMagick),
+      createManifest: createPwaManifest(settings),
       importPwaServiceWorker: importPwaServiceWorker(settings),
     },
   });

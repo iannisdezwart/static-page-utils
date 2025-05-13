@@ -1,15 +1,17 @@
 import {
   copyFileSync,
+  exists,
   existsSync,
   mkdirSync,
   readFileSync,
   writeFileSync,
 } from "fs";
-import { SubClass } from "gm";
 import imageSize from "image-size";
 import { join, parse, resolve } from "path";
 import { PageShell } from "../page-shell/page-shell.js";
 import { Settings } from "../settings.js";
+import { promisify } from "util";
+import { execFile } from "child_process";
 
 interface PWAManifestProtocolHandler {
   protocol: string;
@@ -66,8 +68,7 @@ interface PWAManifest {
 }
 
 export const createPwaManifest =
-  (settings: Settings, imageMagick: SubClass) =>
-  async (manifest: PWAManifest, page: PageShell) => {
+  (settings: Settings) => async (manifest: PWAManifest, page: PageShell) => {
     settings.logger("debug", `Creating PWA Manifest`);
     const webroot = resolve(settings.webroot);
     const pwaDir = join(webroot, "res", "pwa");
@@ -137,7 +138,6 @@ export const createPwaManifest =
 
         await scaleImages(
           settings,
-          imageMagick,
           manifest.icon.png,
           sizes.map((size) => [size, size]),
           90,
@@ -166,7 +166,6 @@ export const createPwaManifest =
 
         await scaleImages(
           settings,
-          imageMagick,
           manifest.icon.maskablePng,
           sizes.map((size) => [size, size]),
           90,
@@ -251,44 +250,51 @@ export const createPwaManifest =
     `);
   };
 
-export const scaleImages = (
+export const scaleImages = async (
   settings: Settings,
-  imageMagick: SubClass,
   inputPath: string,
   dimensions: [number, number][],
   quality: number,
   outputDirectory: string,
-  outputFilename: string
-) =>
-  new Promise<void>((resolve) => {
-    const filePath = parse(inputPath);
-    let finishedImages = 0;
+  outputFilenameBase: string
+) => {
+  inputPath = resolve(inputPath);
+  const filePath = parse(inputPath);
 
-    const increment = () => {
-      finishedImages++;
-      if (finishedImages == dimensions.length) resolve();
-    };
+  await Promise.all(
+    dimensions.map(async ([width, height]) => {
+      const outputFilename = `${outputFilenameBase}-${width}x${height}${filePath.ext}`;
+      const outputFilePath = join(outputDirectory, outputFilename);
 
-    const imageWriteCallback = (path: string) => (err: Error | null) => {
-      if (err !== null) {
-        console.error("error while converting image:", err);
+      if (existsSync(outputFilePath)) {
+        settings.logger(
+          "debug",
+          `Skipping, image already exists: ${outputFilePath}`
+        );
+        return;
+      }
+
+      const args = [
+        inputPath,
+        "-resize",
+        `${width}x${height}>`,
+        "-quality",
+        quality.toString(),
+        "-strip",
+        "-interlace",
+        "Plane",
+        "-sampling-factor",
+        "4:2:0",
+        outputFilePath,
+      ];
+
+      try {
+        await promisify(execFile)("magick", args);
+        settings.logger("info", `Processed image: ${outputFilePath}`);
+      } catch (err) {
+        settings.logger("error", `Error processing image: ${err}`);
         throw err;
       }
-
-      settings.logger("info", `Processed image: ${path}`);
-      increment();
-    };
-
-    for (const dimension of dimensions) {
-      const outputFilePath = `${outputDirectory}/${outputFilename}-${dimension[0]}x${dimension[1]}${filePath.ext}`;
-      if (existsSync(outputFilePath)) {
-        increment();
-        continue;
-      }
-
-      imageMagick(inputPath)
-        .resize(dimension[0], dimension[1], ">")
-        .quality(quality)
-        .write(outputFilePath, imageWriteCallback(outputFilePath));
-    }
-  });
+    })
+  );
+};
